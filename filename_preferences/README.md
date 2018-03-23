@@ -14,4 +14,12 @@ Files are stored in android preferences format to the default flutter documents 
 
 Note: Has not been tried in ios.
 
-    
+### Comparison of flutter preference libraries
+
+Comparison | filename_preferences | shared_preferences
+------------ | ------------- | --------------------
+Can store multiple prefs by filename | Yes * | No
+Requires plugin for native bridge | No | Yes
+Stores prefs in native prefs format | Android format used for all platforms | Yes
+
+<nowiki>*</nowiki> Ios does not have the facility to store preferences by filename built-in, so this is an improvement even over native
