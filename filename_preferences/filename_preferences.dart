@@ -104,7 +104,8 @@ class FileNamePreferences {
 
   static Map<String, Map> _xmlToPrefsMap(String xmlString) {
     Map<String, Map> prefsMap = new Map<String, Map>();
-    xml.XmlDocument document = xml.parse(xmlString);
+    var document = xml.parse(xmlString);
+    //print("rtt="+document.runtimeType.toString());
     var prefsXml = document.findElements("map").elementAt(0);
     //print("px="+prefsXml.toString());
     Iterable<XmlNode> tst = prefsXml.descendants;
