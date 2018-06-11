@@ -5,51 +5,43 @@ import 'package:xml/xml.dart' as xml;
 import 'package:xml/xml/nodes/node.dart' show XmlNode;
 
 class FileNamePreferences {
-  static FileNamePreferences _instance;
   static final String C_DEFAULT_FILENAME = "SharedPreferences.xml";
 
-  FileNamePreferences() {
-    readPreferencesFile(C_DEFAULT_FILENAME);
-  }
-
-  static FileNamePreferences getInstance() {
-    if(_instance==null) {
-      _instance = new FileNamePreferences();
-    }
-    return _instance;
-  }
-
   Map<String, Map> _preferenceCache;
-  String _filename;
 
   bool getBool(String key) {
-    if(_preferenceCache!=null && _preferenceCache.containsKey(key)) {
-      if(_preferenceCache[key]['value']=='true') {
+    if (_preferenceCache != null && _preferenceCache.containsKey(key)) {
+      if (_preferenceCache[key]['value'] == 'true') {
         return true;
-      } else return false;
+      } else
+        return false;
     }
     return null;
   }
 
   int getInt(String key) {
-    if(_preferenceCache!=null && _preferenceCache.containsKey(key)) {
+    if (_preferenceCache != null && _preferenceCache.containsKey(key)) {
       return int.parse(_preferenceCache[key]['value']);
     }
     return null;
   }
 
   double getDouble(String key) {
-    if(_preferenceCache!=null && _preferenceCache.containsKey(key)) {
+    if (_preferenceCache != null && _preferenceCache.containsKey(key)) {
       return double.parse(_preferenceCache[key]['value']);
     }
     return null;
   }
 
   String getString(String key) {
-    if(_preferenceCache!=null && _preferenceCache.containsKey(key)) {
+    if (_preferenceCache != null && _preferenceCache.containsKey(key)) {
       return _preferenceCache[key]['value'];
     }
     return null;
+  }
+
+  List<String> getKeys() {
+    return _preferenceCache.keys.toList();
   }
 
   void setBool(String key, bool value) => _setValue('boolean', key, value);
@@ -58,23 +50,30 @@ class FileNamePreferences {
   void setString(String key, String value) => _setValue('string', key, value);
 
   void _setValue(String valueType, String key, Object value) {
-    if(!_preferenceCache.containsKey(key)) {
-      _preferenceCache[key]=new Map<String, String>();
+    if (value == null) {
+      remove(key);
+      return;
     }
-    _preferenceCache[key]["type"]=valueType;
-    _preferenceCache[key]["value"]=value.toString();
+    if (!_preferenceCache.containsKey(key)) {
+      _preferenceCache[key] = new Map<String, String>();
+    }
+    _preferenceCache[key]["type"] = valueType;
+    _preferenceCache[key]["value"] = value.toString();
+  }
+
+  void remove(String key) {
+    if(_preferenceCache.containsKey(key)) _preferenceCache.remove(key);
   }
 
   void clear() {
-    _filename=C_DEFAULT_FILENAME;
-    if(_preferenceCache!=null) _preferenceCache.clear();
+    if (_preferenceCache != null) _preferenceCache.clear();
   }
 
-  Future<String> readPreferencesFile(String filename) async {
-    _filename = filename;
+  Future<String> readPreferencesFile(String fileName) async {
+    if (fileName == null) fileName = C_DEFAULT_FILENAME;
     _preferenceCache = new Map<String, Map>();
     try {
-      File file = await _getLocalFile(_filename);
+      File file = await _getLocalFile(fileName);
       // read the variable as a string from the file.
       String xmlString = await file.readAsString();
       _preferenceCache = _xmlToPrefsMap(xmlString);
@@ -87,10 +86,10 @@ class FileNamePreferences {
 
   // --------------------------------------------------------------------------- PRIVATE FUNCTIONS
 
-  Future<File> _getLocalFile(String filename) async {
+  Future<File> _getLocalFile(String fileName) async {
     // get the path to the document directory.
     String dir = (await getApplicationDocumentsDirectory()).path;
-    File f = new File('$dir/$filename');
+    File f = new File('$dir/$fileName');
     return f;
   }
 
@@ -98,8 +97,9 @@ class FileNamePreferences {
     await (await file).writeAsString(contents);
   }
 
-  commit() {
-    _writeFile(_getLocalFile(_filename), prefsMapToXmlDocument().toXmlString(pretty: true, indent: '\t'));
+  apply(String fileName) {
+    _writeFile(_getLocalFile(fileName),
+        prefsMapToXmlDocument().toXmlString(pretty: true, indent: '\t'));
   }
 
   static Map<String, Map> _xmlToPrefsMap(String xmlString) {
@@ -110,18 +110,18 @@ class FileNamePreferences {
     //print("px="+prefsXml.toString());
     Iterable<XmlNode> tst = prefsXml.descendants;
     Iterator iter = tst.iterator;
-    while(iter.moveNext()) {
+    while (iter.moveNext()) {
       //print("iter="+iter.current.toString()+" ("+iter.current.runtimeType.toString()+")");
-      if(iter.current is xml.XmlElement) {
+      if (iter.current is xml.XmlElement) {
         xml.XmlElement element = iter.current;
         //print("--------- XmlElement=="+element.name.toString());
-        String value=element.getAttribute("value");
-        String name=element.getAttribute("name");
-        if(!prefsMap.containsKey(name)) {
-          prefsMap[name]=new Map<String, String>();
+        String value = element.getAttribute("value");
+        String name = element.getAttribute("name");
+        if (!prefsMap.containsKey(name)) {
+          prefsMap[name] = new Map<String, String>();
         }
-        prefsMap[name]["type"]=element.name.toString();
-        prefsMap[name]["value"]=value.toString();
+        prefsMap[name]["type"] = element.name.toString();
+        prefsMap[name]["value"] = value.toString();
       }
     }
     return prefsMap;
@@ -138,11 +138,9 @@ class FileNamePreferences {
           builder.attribute("value", _preferenceCache[key]["value"]);
         });
       });
-
     });
     var xmlDoc = builder.build();
     //print(xmlDoc.toXmlString(pretty: true, indent: '\t'));
     return xmlDoc;
   }
 }
-
