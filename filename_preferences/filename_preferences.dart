@@ -9,35 +9,35 @@ class FileNamePreferences {
 
   Map<String, Map> _preferenceCache;
 
-  bool getBool(String key) {
+  bool getBool(String key, [bool defaultReturn]) {
     if (_preferenceCache != null && _preferenceCache.containsKey(key)) {
       if (_preferenceCache[key]['value'] == 'true') {
         return true;
       } else
         return false;
     }
-    return null;
+    return defaultReturn;
   }
 
-  int getInt(String key) {
+  int getInt(String key, [int defaultReturn]) {
     if (_preferenceCache != null && _preferenceCache.containsKey(key)) {
       return int.parse(_preferenceCache[key]['value']);
     }
-    return null;
+    return defaultReturn;
   }
 
-  double getDouble(String key) {
+  double getDouble(String key, [double defaultReturn]) {
     if (_preferenceCache != null && _preferenceCache.containsKey(key)) {
       return double.parse(_preferenceCache[key]['value']);
     }
-    return null;
+    return defaultReturn;
   }
 
-  String getString(String key) {
+  String getString(String key, [String defaultReturn]) {
     if (_preferenceCache != null && _preferenceCache.containsKey(key)) {
       return _preferenceCache[key]['value'];
     }
-    return null;
+    return defaultReturn;
   }
 
   List<String> getKeys() {
