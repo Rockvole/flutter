@@ -10,9 +10,7 @@ Flutter class to store and retrieve preference files by name
     # File is not written until commit
     fileNamePreferences.apply("scores.xml");
     
-Files are stored in android preferences format to the default flutter documents directory.
-
-Note: Has not been tried in ios.
+Files are stored in android preferences format to the default flutter documents directory
 
 ### Comparison of flutter preference libraries
 
